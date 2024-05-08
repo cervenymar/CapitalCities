@@ -1,73 +1,123 @@
-﻿namespace CapitalCities { 
+﻿namespace CapitalCities {
 
-public class Game
+    public class Game
     {
-        private string selectedRegion;
-        private List<Capitals> filteredCapitals;
-        private CapitalData capitalData;
-
+        public string? selectedRegion;
+        public List<Capitals>? filteredCapitals;
+        public CapitalData capitalData;
+        int correctCount = 0;
+        int wrongCount = 0;
         public Game()
         {
             capitalData = new CapitalData();
         }
 
-        public void Start()
+        public bool selectGame()
         {
-            bool playAgain = true;
-
-            while (playAgain)
+            var invalidAnswer = true;
+            Console.WriteLine("Would you like to guess:\n1. Capitals\nor\n2. Countries?");
+            while (invalidAnswer)
             {
-                Console.WriteLine("What range would you like to play?");
-                Console.WriteLine("1. The entire world");
-                Console.WriteLine("2. America");
-                Console.WriteLine("3. Europe");
-                Console.WriteLine("4. Asia");
-                Console.WriteLine("5. Africa");
-
-                // Prompt user for input
-                Console.Write("Enter your choice (or 'stop' to quit): ");
-                string userInput = Console.ReadLine();
-
-                if (userInput.Equals("stop", StringComparison.InvariantCultureIgnoreCase))
+                var response = Console.ReadLine();
+                switch (response)
                 {
-                    EndGame();
-                    break; // Exit the loop
+                    case "stop":
+                        EndGame();
+                        break;
+                    case "1":
+                        return true;
+                    case "2":
+                        return false;
+                    default:
+                        Console.WriteLine("Invalid answer. Write 1 or 2");
+                        break; //end switch
                 }
 
-                // Determine the selected region based on user input
+            }
+
+            return false;
+        }
+        public String selectRange()
+        {
+            Console.Clear();
+            Console.WriteLine("What range would you like to play?");
+            Console.WriteLine("1. The entire world");
+            Console.WriteLine("2. America");
+            Console.WriteLine("3. Europe");
+            Console.WriteLine("4. Asia");
+            Console.WriteLine("5. Africa");
+            Console.WriteLine("Enter your choice (or 'stop' to quit): ");
+            
+            // Determine the selected region based on user input
+            var invalidAnswer = true;
+            while (invalidAnswer)
+            {
+                string? userInput = Console.ReadLine();
                 switch (userInput)
                 {
+                    case "stop":
+                        EndGame();
+                        break;
                     case "1":
-                        selectedRegion = "The entire world";
-                        break;
+                        return "The entire world";
+
                     case "2":
-                        selectedRegion = "America";
-                        break;
+                        return "America";
+
                     case "3":
-                        selectedRegion = "Europe";
-                        break;
+                        return "Europe";
+
                     case "4":
-                        selectedRegion = "Asia";
-                        break;
+                        return "Asia";
+
                     case "5":
-                        selectedRegion = "Africa";
-                        break;
+                        return "Africa";
                     default:
-                        Console.WriteLine("Invalid choice!");
-                        continue; // Restart the loop
+                        Console.WriteLine("Invalid choice! Write 1 to 5 or stop to quit.");
+                        break;
                 }
 
-                List<Capitals> allCapitals = capitalData.ReadCapitalCitiesFromCSV("capitalCities.csv");
-                filteredCapitals = capitalData.FilterCapitalsByRegion(allCapitals, selectedRegion);
-
-                PlayGame();
             }
+            return "";
+        }
+        public void Start()
+        {
+                var range = selectRange();                
+            
+                CapitalGuessingGame();
+
         }
 
-        private void PlayGame()
+            private void EndGame()
+            {
+                Console.Clear();
+                Console.WriteLine("Saving current game data...");
+                Console.WriteLine("The game has stopped.");
+
+                // Ask user if they want to play again
+                Console.Write("Do you want to play again? (yes/no): ");
+                string? playAgainInput = Console.ReadLine();
+                if (playAgainInput == "yes")
+                {
+                    
+                }   
+
+                bool playAgain = playAgainInput.Equals("yes", StringComparison.InvariantCultureIgnoreCase);
+                switch(playAgainInput)
+                if (playAgain)
+                {
+                    Start(); // Start a new game
+                }
+                else
+                {
+                    Console.Clear();
+                    Console.WriteLine("Goodbye!");
+                }
+            }
+        
+
+        private void CapitalGuessingGame()
         {
-            int correctCount = 0;
-            int wrongCount = 0;
 
             // Shuffle the list of capitals
             var rnd = new Random();
@@ -75,7 +125,7 @@ public class Game
 
             foreach (var capital in filteredCapitals)
             {
-                
+
                 Console.WriteLine($"What is the capital city of {capital.Country}?");
 
                 // Get user input for the guess
@@ -109,29 +159,6 @@ public class Game
             capitalData.SaveGameResult(DateTime.Now, correctCount, wrongCount, successRate, selectedRegion);
 
             EndGame();
-        }
-
-        private void EndGame()
-        {
-            Console.Clear();
-            Console.WriteLine("Saving current game data...");
-            Console.WriteLine("The game has stopped.");
-
-            // Ask user if they want to play again
-            Console.Write("Do you want to play again? (yes/no): ");
-            string playAgainInput = Console.ReadLine();
-
-            bool playAgain = playAgainInput.Equals("yes", StringComparison.InvariantCultureIgnoreCase);
-
-            if (playAgain)
-            {
-                Start(); // Start a new game
-            }
-            else
-            {
-                Console.Clear();
-                Console.WriteLine("Goodbye!");
-            }
         }
     }
 }
