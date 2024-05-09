@@ -1,10 +1,15 @@
 ﻿using CapitalCities;
+using System.ComponentModel.DataAnnotations;
 
 public class CapitalData
-{    
-    public List<Capitals> ReadCapitalCitiesFromCSV(string filePath)
-    {
-        List<Capitals> capitalList = new List<Capitals>();
+{
+    List<Capitals> capitalList;
+    public CapitalData() {
+        this.capitalList = new List<Capitals>();
+    }
+    
+    public List<Capitals> ReadCapitalCitiesFromCSV(string filePath)    {
+        
 
         try
         {
@@ -22,7 +27,7 @@ public class CapitalData
                         Continent = values[2]
                     };
 
-                    capitalList.Add(capital);
+                    this.capitalList.Add(capital);
                 }
             }
         }
@@ -72,10 +77,13 @@ public class CapitalData
         return filteredCapitals;
     }
 
-    public void SaveGameResult(DateTime timestamp, int correctGuesses, int wrongGuesses, double successRate, string selectedRegion)
+    public void SaveGameResult(int correctGuesses, int wrongGuesses, string selectedRegion)
     {
-        string filePath = "gameResults.csv";
-
+        
+        DateTime timestamp = DateTime.Now; 
+        string filePath = "../../../gameResults.csv";     
+               
+        
         // Create or append to the CSV file
         using (var writer = new StreamWriter(filePath, true))
         {
@@ -83,7 +91,16 @@ public class CapitalData
             string formattedTimestamp = timestamp.ToString("yyyy-MM-dd HH:mm:ss");
 
             // Write the game result to the CSV file
-            writer.WriteLine($"{formattedTimestamp},{selectedRegion},{correctGuesses},{wrongGuesses},{successRate:F2}");
+            writer.WriteLine($"{formattedTimestamp},{selectedRegion},{correctGuesses},{wrongGuesses},{this.successRate(correctGuesses, wrongGuesses)}");
         }
+    }
+
+    public string successRate(float correctGuesses, float wrongGuesses)
+    {
+        
+        if (correctGuesses == 0)
+            return "0%";
+        else
+            return $"{(correctGuesses / (correctGuesses + wrongGuesses))*100}%";
     }
 }

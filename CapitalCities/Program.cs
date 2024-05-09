@@ -1,29 +1,41 @@
 ﻿using CapitalCities;
+using System.Security.Cryptography.X509Certificates;
 
 class Program
 {
-    static void Main(string[] args)
-    {       
-        var playAgain = true;
-        while (playAgain)
-        {
-            Console.WriteLine("Would you like to play a game? (yes/no)");
-            var playAgainInput = Console.ReadLine();
-            if (playAgainInput.Equals("no", StringComparison.CurrentCultureIgnoreCase))
-            {
-                playAgain = false;
-                return;
-            }else if (playAgainInput.ToLower() == "yes")
-            {
-                playAgain = true;
-                Game game = new Game();
-                game.Start();
-            }else
-            {
-                Console.WriteLine("Invalid answer.");
-            }
-            
-        }
-        
+    public static void Main(string[] args)
+    {
+        Startup();        
     }
+    public static void Startup()
+    {
+        //initialize, null past Game instances
+        Game game = null;
+        var invalidAnswer = true;
+        while (invalidAnswer)
+        {
+            Console.Clear();
+            Console.WriteLine("Would you like to play a game? (yes/no)");
+            var playAgainInput = Console.ReadLine().ToLower();
+            switch (playAgainInput)
+            {
+                case "yes":
+                    invalidAnswer = false;
+                    game = new Game();
+                    game.StartGame();
+                    break;
+                case "no":
+                    invalidAnswer = false;
+                    System.Environment.Exit(0);
+                    continue;
+                default:
+                    Console.WriteLine("Invalid answer.");
+                    break;
+            }
+            break;
+
+        }
+    
+    }
+
 }

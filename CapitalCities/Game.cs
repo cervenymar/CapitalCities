@@ -1,18 +1,46 @@
-﻿namespace CapitalCities {
+﻿using System;
+using System.Diagnostics.Metrics;
+using System.IO;
+using System.Security.Cryptography.X509Certificates;
+using System.Transactions;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+
+namespace CapitalCities {
 
     public class Game
     {
-        public string? selectedRegion;
-        public List<Capitals>? filteredCapitals;
-        public CapitalData capitalData;
-        int correctCount = 0;
-        int wrongCount = 0;
+        private int correctCount, wrongCount;        
+        private string range, gamemode;
+
+       private CapitalData Data = new CapitalData();
+       private List<Capitals> gameData;
+
         public Game()
         {
-            capitalData = new CapitalData();
+            this.correctCount = 0;
+            this.wrongCount = 0;
+            this.range = this.selectRange();
+            this.gamemode = this.selectGame();
+            this.gameData = Data.FilterCapitalsByRegion(Data.ReadCapitalCitiesFromCSV("../../../capitalCities.csv"), this.range);
         }
 
-        public bool selectGame()
+        public void StartGame()
+        {
+            Console.Clear();
+            if (this.gamemode == "Capitals")
+            {
+                
+                Console.WriteLine("You are guessing the Capital Cities.");
+                CapitalGuessingGame(this.gameData, this.correctCount, this.wrongCount);
+            }
+            else if(this.gamemode == "Country")
+            {                
+                Console.WriteLine("You are guessing the Countries based on Capital Cities.");
+                CountryGuessingGame(this.gameData, this.correctCount, this.wrongCount);
+            }            
+        }
+
+        private string selectGame()
         {
             var invalidAnswer = true;
             Console.WriteLine("Would you like to guess:\n1. Capitals\nor\n2. Countries?");
@@ -22,22 +50,22 @@
                 switch (response)
                 {
                     case "stop":
-                        EndGame();
+                        this.EndGame();
                         break;
                     case "1":
-                        return true;
+                        return "Capitals";
                     case "2":
-                        return false;
+                        return "Country";
                     default:
                         Console.WriteLine("Invalid answer. Write 1 or 2");
-                        break; //end switch
+                        break;
                 }
 
             }
 
-            return false;
+            return "";
         }
-        public String selectRange()
+        private string selectRange()
         {
             Console.Clear();
             Console.WriteLine("What range would you like to play?");
@@ -56,7 +84,7 @@
                 switch (userInput)
                 {
                     case "stop":
-                        EndGame();
+                        this.EndGame();
                         break;
                     case "1":
                         return "The entire world";
@@ -79,44 +107,23 @@
 
             }
             return "";
-        }
-        public void Start()
+        }        
+        private void EndGame()
         {
-                var range = selectRange();                
-            
-                CapitalGuessingGame();
+            if (this.correctCount + this.wrongCount > 0)
+                this.Data.SaveGameResult(this.correctCount, this.wrongCount, this.range);
+            Console.Clear();
+            Console.WriteLine("The game has stopped. Saving current game data...");
+            Console.WriteLine($"Statistics:\n You have answered {this.correctCount+this.wrongCount} questions. {this.correctCount} of which were correct. Your success rate is {this.Data.successRate(this.correctCount,this.wrongCount)}");
+            Console.WriteLine("Press any key to continue.");
+            Console.ReadKey();
+            //return to the beginning of the program
+            Program.Startup();
 
         }
 
-            private void EndGame()
-            {
-                Console.Clear();
-                Console.WriteLine("Saving current game data...");
-                Console.WriteLine("The game has stopped.");
 
-                // Ask user if they want to play again
-                Console.Write("Do you want to play again? (yes/no): ");
-                string? playAgainInput = Console.ReadLine();
-                if (playAgainInput == "yes")
-                {
-                    
-                }   
-
-                bool playAgain = playAgainInput.Equals("yes", StringComparison.InvariantCultureIgnoreCase);
-                switch(playAgainInput)
-                if (playAgain)
-                {
-                    Start(); // Start a new game
-                }
-                else
-                {
-                    Console.Clear();
-                    Console.WriteLine("Goodbye!");
-                }
-            }
-        
-
-        private void CapitalGuessingGame()
+        private void CapitalGuessingGame(List<Capitals> filteredCapitals, int correctCount, int wrongCount)
         {
 
             // Shuffle the list of capitals
@@ -134,7 +141,7 @@
                 // Check if the user wants to stop midgame
                 if (userGuess.Equals("stop", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    EndGame();
+                    this.EndGame();
                     return; // Exit the method
                 }
 
@@ -143,22 +150,52 @@
                 {
                     Console.Clear();
                     Console.WriteLine("Correct!");
-                    correctCount++;
+                    this.correctCount++;
                 }
                 else
                 {
                     Console.Clear();
                     Console.WriteLine($"Incorrect. The correct capital city of {capital.Country} is {capital.Capital}.");
-                    wrongCount++;
+                    this.wrongCount++;
                 }
             }
+        }
+        private void CountryGuessingGame(List<Capitals> filteredCapitals, int correctCount, int wrongCount)
+            {
 
-            double successRate = (double)correctCount / (correctCount + wrongCount) * 100;
+                // Shuffle the list of capitals
+                var rnd = new Random();
+                filteredCapitals = filteredCapitals.OrderBy(c => rnd.Next()).ToList();
 
-            // Save game result to CSV file
-            capitalData.SaveGameResult(DateTime.Now, correctCount, wrongCount, successRate, selectedRegion);
+                foreach (var country in filteredCapitals)
+                {
 
-            EndGame();
+                    Console.WriteLine($"What is the country of {country.Capital}?");
+
+                    string? userGuess = Console.ReadLine();
+
+                    // Check if the user wants to stop midgame
+                    if (userGuess.Equals("stop", StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        this.EndGame();
+                        return; // Exit the method
+                    }
+
+                    // Check if the guess is correct
+                    if (userGuess.Equals(country.Country, StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        Console.Clear();
+                        Console.WriteLine("Correct!");
+                        this.correctCount++;
+                    }
+                    else
+                    {
+                        Console.Clear();
+                        Console.WriteLine($"Incorrect. The correct country of {country.Capital} is {country.Country}.");
+                        this.wrongCount++;
+                    }
+                }                
+            }   
         }
     }
-}
+
