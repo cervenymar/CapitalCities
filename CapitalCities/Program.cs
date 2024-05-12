@@ -16,7 +16,7 @@ class Program
         {
             Console.Clear();
             Console.WriteLine("Would you like to play a game? (yes/no)");
-            var playAgainInput = Console.ReadLine().ToLower();
+            string? playAgainInput = Console.ReadLine().ToLower();
             switch (playAgainInput)
             {
                 case "yes":
