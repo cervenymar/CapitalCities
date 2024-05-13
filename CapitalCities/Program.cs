@@ -29,8 +29,10 @@ class Program
                     System.Environment.Exit(0);
                     continue;
                 default:
-                    Console.WriteLine("Invalid answer.");
-                    break;
+                    invalidAnswer = true;
+                    Console.WriteLine("Invalid answer. Press any key to restart.");
+                    Console.ReadKey();
+                    continue;
             }
             break;
 
