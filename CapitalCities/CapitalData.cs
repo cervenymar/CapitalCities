@@ -66,7 +66,7 @@ public class CapitalData
             default:
                 foreach (var capital in capitals)
                 {
-                    if (capital.Continent.Equals(selectedRegion, StringComparison.InvariantCultureIgnoreCase))
+                    if (capital.Continent.Contains(selectedRegion, StringComparison.InvariantCultureIgnoreCase))
                     {
                         filteredCapitals.Add(capital);
                     }
