@@ -37,7 +37,8 @@ namespace CapitalCities {
             {                
                 Console.WriteLine("You are guessing the Countries based on Capital Cities.");
                 CountryGuessingGame(this.gameData, this.correctCount, this.wrongCount);
-            }            
+            }
+            this.EndGame();
         }
 
         private string selectGame()
@@ -158,7 +159,9 @@ namespace CapitalCities {
                     Console.WriteLine($"Incorrect. The correct capital city of {capital.Country} is {capital.Capital}.");
                     this.wrongCount++;
                 }
+                
             }
+            
         }
         private void CountryGuessingGame(List<Capitals> filteredCapitals, int correctCount, int wrongCount)
             {
